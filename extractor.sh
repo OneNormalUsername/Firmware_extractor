@@ -70,6 +70,18 @@ if [[ ! -d "$toolsdir/update_payload_extractor" ]]; then
 else
     git -C "$toolsdir/update_payload_extractor" pull
 fi
+if [[ ! -d "$toolsdir/otadump-repo" ]]; then
+    git clone -q https://github.com/crazystylus/otadump.git "$toolsdir/otadump-repo"
+    /bin/bash $toolsdir/otadump-repo/install.sh
+    # Let's avoid messing with PATH: better copy the binary retrieved by otadump's install.sh to $toolsdir
+    mv -f ~/.local/bin/otadump "$toolsdir"
+    echo "Moved otadump binary from ~/.local/bin/otadump to tools directory for you"
+else 
+    git -C "$toolsdir/otadump-repo" pull
+    /bin/bash $toolsdir/otadump-repo/install.sh
+    mv -f ~/.local/bin/otadump "$toolsdir"
+    echo "Moved otadump binary from ~/.local/bin/otadump to tools directory for you"
+fi
 
 simg2img="$toolsdir/$HOST/bin/simg2img"
 packsparseimg="$toolsdir/$HOST/bin/packsparseimg"
@@ -85,6 +97,7 @@ kdz_extract="$toolsdir/kdztools/unkdz.py"
 dz_extract="$toolsdir/kdztools/undz.py"
 ruu="$toolsdir/$HOST/bin/RUU_Decrypt_Tool"
 aml_extract="$toolsdir/aml-upgrade-package-extract"
+otadump="$toolsdir/otadump"
 
 romzip="$(realpath $1)"
 romzipext="${romzip##*.}"
@@ -422,7 +435,7 @@ elif [[ $(7z l -ba "$romzip" | grep .tar) && ! $(7z l -ba "$romzip" | grep tar.m
 elif [[ $(7z l -ba "$romzip" | grep payload.bin) ]]; then
     echo "AB OTA detected"
     7z e -y "$romzip" payload.bin 2>/dev/null >> $tmpdir/zip.log
-    otadump -o $tmpdir payload.bin
+    $otadump -o $tmpdir payload.bin
     for partition in $PARTITIONS; do
         [[ -e "$tmpdir/$partition.img" ]] && mv "$tmpdir/$partition.img" "$outdir/$partition.img"
     done

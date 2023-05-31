@@ -22,12 +22,6 @@ Install cygwin, and select
 
 If you get syntax errors run dos2unix on extractor.sh
 
-
-### Misc
-
-- Install rust using https://rustup.rs/
-- Run `cargo install otadump`
-
 ## How to use
 ### Download
 ```
