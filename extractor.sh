@@ -79,7 +79,6 @@ payload_go="$toolsdir/$HOST/bin/payload-dumper-go"
 sdat2img="$toolsdir/sdat2img.py"
 ozipdecrypt="$toolsdir/oppo_ozip_decrypt/ozipdecrypt.py"
 lpunpack="$toolsdir/$HOST/bin/lpunpack"
-splituapp="$toolsdir/splituapp"
 pacextractor="$toolsdir/pacExtractor.py"
 nb0_extract="$toolsdir/$HOST/bin/nb0-extract"
 kdz_extract="$toolsdir/kdztools/unkdz.py"
@@ -446,10 +445,12 @@ elif [[ $(7z l -ba "$romzip" | grep ".*.rar\|.*.zip") ]]; then
 elif [[ $(7z l -ba "$romzip" | grep "UPDATE.APP") ]]; then
     echo "Huawei UPDATE.APP detected"
     7z x "$romzip" UPDATE.APP
-    python3 $splituapp -f "UPDATE.APP" -l super || (
-    for partition in $PARTITIONS; do
-        python3 $splituapp -f "UPDATE.APP" -l ${partition/.img/} || echo "$partition not found in UPDATE.APP"
-    done)
+    huextract -i UPDATE.APP list
+    # Above is to log the partitions present within UPDATE.APP
+    huextract -i UPDATE.APP extract
+    
+    # Add code here
+
     if [ -f super.img ]; then
         ($simg2img super.img super.img.raw || mv super.img super.img.raw) 2>/dev/null
 
